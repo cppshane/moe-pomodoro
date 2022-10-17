@@ -93,7 +93,7 @@
 
     private void Tick(DateTime signalTime) {
         var time = OriginalTimeSpan.Subtract(signalTime - StartTime).Add(TimeSpan.FromSeconds(1));
-        if (ClockTime.Seconds == 0) {
+        if (ClockTime.TotalSeconds == 0) {
             PlaySound(MoshiSound);
             Reset();
         } else {
