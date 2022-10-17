@@ -1,0 +1,163 @@
+﻿@page "/"
+@using SystemTimer = System.Timers.Timer;
+@using Newtonsoft.Json;
+
+<PageTitle>Moe Pomodoro</PageTitle>
+
+<div id="background-1" style="--background-image-1:url('@BackgroundImage1');--background-z-1:@BackgroundZ1;"></div>
+<div id="background-2" style="--background-image-2:url('@BackgroundImage2');--background-z-2:@BackgroundZ2;"></div>
+<div class="dark-overlay"></div>
+<div class="outer-container">
+    <div class="inner-container">
+        <h1>Moe Pomodoro</h1>
+        <a class="github-button" href="https://github.com/cppshane/moe-pomodoro" data-icon="octicon-star" data-size="large" data-show-count="true">Star</a>
+        <div class="clock-container" @onclick="ToggleState">
+            <p id="time-text">@TimerString</p>
+            <div id="clock-background" style="--clock-background-color:@ClockBackgroundColor"></div>
+            <div id="clock-foreground"></div>
+        </div>
+        <div id="reset-container" @onclick="Reset">
+            <img src="https://cdn.shaneduffy.io/moe-pomodoro/reset.webp" />
+            <div id="reset-background"></div>
+        </div>
+    </div>
+</div>
+@if (SoundPath != String.Empty) {
+    <audio autoplay controls hidden><source src="@SoundPath" /></audio>
+}
+
+@code {
+    private static readonly string WaifuPicEndpoint = "https://api.waifu.pics/sfw/waifu";
+    private static readonly string MoshiSound = "https://cdn.shaneduffy.io/moe-pomodoro/audio/moshi.mp3";
+
+    private static readonly TimeSpan WorkTimeSpan = TimeSpan.FromMinutes(25);
+    private static readonly TimeSpan BreakTimeSpan = TimeSpan.FromMinutes(5);
+    private static readonly string BlackClockColor = "rgba(0, 0, 0, 0.3)";
+    private static readonly string GreenClockColor = "rgba(0, 255, 20, 0.15)";
+    private static readonly string BlueClockColor = "rgba(0, 184, 255, 0.1)";
+
+    public string TimerString {
+        get {
+            return ClockTime.ToString(@"mm\:ss");
+        }
+    }
+
+    private HttpClient client;
+
+    private string BackgroundImage1;
+    private string BackgroundImage2;
+    private string BackgroundZ1 = "90";
+    private string BackgroundZ2 = "89";
+    private string SoundPath;
+
+    private bool ShowBackground1 = true;
+    private bool WorkMode;
+    private bool TimerActive;
+
+    private TimeSpan OriginalTimeSpan;
+    private TimeSpan ClockTime;
+    private DateTime StartTime;
+
+    private SystemTimer Timer;
+    private string ClockBackgroundColor;
+
+    public Index() {
+        client = new HttpClient();
+        client.BaseAddress = new Uri(WaifuPicEndpoint);
+
+        BackgroundImage1 = String.Empty;
+        BackgroundImage2 = String.Empty;
+        RotateImage();
+
+        SoundPath = String.Empty;
+        WorkMode = true;
+        TimerActive = false;
+
+        OriginalTimeSpan = WorkTimeSpan;
+        ClockTime = OriginalTimeSpan;
+
+        Timer = new SystemTimer(1000);
+        Timer.Elapsed += (sender, e) => Tick(e.SignalTime);
+
+        ClockBackgroundColor = BlackClockColor;
+    }
+
+    private void StartTimer() {
+        StartTime = DateTime.Now;
+        Timer.Start();
+    }
+
+    private void PauseTimer() {
+        Timer.Stop();
+    }
+
+    private void Tick(DateTime signalTime) {
+        var time = OriginalTimeSpan.Subtract(signalTime - StartTime).Add(TimeSpan.FromSeconds(1));
+        if (ClockTime.Seconds == 0) {
+            PlaySound(MoshiSound);
+            Reset();
+        } else {
+            ClockTime = time;
+        }
+
+        StateHasChanged();
+    }
+
+    private void PlaySound(string soundPath) {
+        SoundPath = String.Empty;
+        StateHasChanged();
+        SoundPath = soundPath;
+    }
+
+    private async void RotateImage() {
+        var requestResult = await client.GetAsync(WaifuPicEndpoint);
+        var content = await requestResult.Content.ReadAsStringAsync();
+
+        if (ShowBackground1) {
+            BackgroundImage2 = String.Empty;
+            BackgroundZ1 = "89";
+            BackgroundZ2 = "90";
+            BackgroundImage2 = (JsonConvert.DeserializeObject<dynamic>(content))?.url ?? String.Empty;
+        } else {
+            BackgroundImage1 = String.Empty;
+            BackgroundZ1 = "90";
+            BackgroundZ2 = "89";
+            BackgroundImage1 = (JsonConvert.DeserializeObject<dynamic>(content))?.url ?? String.Empty;
+        }
+
+        ShowBackground1 = !ShowBackground1;
+
+        StateHasChanged();
+    }
+
+    private void Reset() {
+        Timer.Stop();
+
+        if (WorkMode) {
+            OriginalTimeSpan = BreakTimeSpan;
+        } else {
+            OriginalTimeSpan = WorkTimeSpan;
+        }
+
+        ClockBackgroundColor = BlackClockColor;
+        ClockTime = OriginalTimeSpan;
+        WorkMode = !WorkMode;
+        TimerActive = false;
+
+        RotateImage();
+    }
+
+    private void ToggleState() {
+        if (TimerActive) {
+            OriginalTimeSpan = ClockTime;
+            Timer.Stop();
+            ClockBackgroundColor = BlackClockColor;
+        } else {
+            StartTime = DateTime.Now;
+            Timer.Start();
+            ClockBackgroundColor = WorkMode ? GreenClockColor : BlueClockColor;
+        }
+
+        TimerActive = !TimerActive;
+    }
+}
