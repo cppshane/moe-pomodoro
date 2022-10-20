@@ -27,7 +27,7 @@
 }
 
 @code {
-    private static readonly string WaifuPicEndpoint = "https://api.waifu.pics/sfw/waifu";
+    private static readonly string PicEndpoint = "https://api.waifu.im/random/?is_nsfw=false";
     private static readonly string MoshiSound = "https://cdn.shaneduffy.io/moe-pomodoro/audio/moshi.mp3";
 
     private static readonly TimeSpan WorkTimeSpan = TimeSpan.FromMinutes(25);
@@ -63,7 +63,6 @@
 
     public Index() {
         client = new HttpClient();
-        client.BaseAddress = new Uri(WaifuPicEndpoint);
 
         BackgroundImage1 = String.Empty;
         BackgroundImage2 = String.Empty;
@@ -110,19 +109,19 @@
     }
 
     private async void RotateImage() {
-        var requestResult = await client.GetAsync(WaifuPicEndpoint);
+        var requestResult = await client.GetAsync(PicEndpoint);
         var content = await requestResult.Content.ReadAsStringAsync();
 
         if (ShowBackground1) {
             BackgroundImage2 = String.Empty;
             BackgroundZ1 = "89";
             BackgroundZ2 = "90";
-            BackgroundImage2 = (JsonConvert.DeserializeObject<dynamic>(content))?.url ?? String.Empty;
+            BackgroundImage2 = (JsonConvert.DeserializeObject<dynamic>(content))?.images[0].url ?? String.Empty;
         } else {
             BackgroundImage1 = String.Empty;
             BackgroundZ1 = "90";
             BackgroundZ2 = "89";
-            BackgroundImage1 = (JsonConvert.DeserializeObject<dynamic>(content))?.url ?? String.Empty;
+            BackgroundImage1 = (JsonConvert.DeserializeObject<dynamic>(content))?.images[0].url ?? String.Empty;
         }
 
         ShowBackground1 = !ShowBackground1;
