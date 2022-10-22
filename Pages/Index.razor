@@ -5,8 +5,8 @@
 
 <PageTitle>Moe Pomodoro</PageTitle>
 
-<div id="background-1" style="--background-image-1:url('@BackgroundImage1');--background-z-1:@BackgroundZ1;"></div>
-<div id="background-2" style="--background-image-2:url('@BackgroundImage2');--background-z-2:@BackgroundZ2;"></div>
+<div id="background-1" style="--background-image-1:url('@_backgroundImage1');--background-z-1:@_backgroundZ1;"></div>
+<div id="background-2" style="--background-image-2:url('@_backgroundImage2');--background-z-2:@_backgroundZ2;"></div>
 <div class="dark-overlay"></div>
 <div class="outer-container">
     <div class="inner-container">
@@ -14,7 +14,7 @@
         <a class="github-button" href="https://github.com/cppshane/moe-pomodoro" data-icon="octicon-star" data-size="large" data-show-count="true">Star</a>
         <div class="clock-container" @onclick="ToggleState">
             <p id="time-text">@TimerString</p>
-            <div id="clock-background" style="--clock-background-color:@ClockBackgroundColor"></div>
+            <div id="clock-background" style="--clock-background-color:@_clockBackgroundColor"></div>
             <div id="clock-foreground"></div>
         </div>
         <div id="reset-container" @onclick="Reset">
@@ -23,8 +23,8 @@
         </div>
     </div>
 </div>
-@if (SoundPath != String.Empty) {
-    <audio autoplay controls hidden><source src="@SoundPath" /></audio>
+@if (_soundPath != String.Empty) {
+    <audio autoplay controls hidden><source src="@_soundPath" /></audio>
 }
 
 @code {
@@ -39,74 +39,58 @@
 
     public string TimerString {
         get {
-            return ClockTime.ToString(@"mm\:ss");
+            return _clockTime.ToString(@"mm\:ss");
         }
     }
 
-    private HttpClient client;
+    private HttpClient client = new HttpClient();
+    private SystemTimer _timer = new SystemTimer(1000);
 
-    private string BackgroundImage1;
-    private string BackgroundImage2;
-    private string BackgroundZ1 = "90";
-    private string BackgroundZ2 = "89";
-    private string SoundPath;
+    private string _backgroundImage1 = String.Empty;
+    private string _backgroundImage2 = String.Empty;
+    private string _backgroundZ1 = "90";
+    private string _backgroundZ2 = "89";
+    private string _soundPath;
+    private string _clockBackgroundColor = BlackClockColor;
 
-    private bool ShowBackground1 = true;
-    private bool WorkMode;
-    private bool TimerActive;
+    private bool _showBackground1 = true;
+    private bool _workMode = true;
+    private bool _timerActive = false;
 
-    private TimeSpan OriginalTimeSpan;
-    private TimeSpan ClockTime;
-    private DateTime StartTime;
+    private TimeSpan _originalTimeSpan;
+    private TimeSpan _clockTime;
+    private DateTime _startTime;
 
-    private SystemTimer Timer;
-    private string ClockBackgroundColor;
 
     public Index() {
-        client = new HttpClient();
-
-        BackgroundImage1 = String.Empty;
-        BackgroundImage2 = String.Empty;
-        //RotateImage();
-
-        SoundPath = String.Empty;
-        WorkMode = true;
-        TimerActive = false;
-
-        OriginalTimeSpan = WorkTimeSpan;
-        ClockTime = OriginalTimeSpan;
-
-        Timer = new SystemTimer(1000);
-        Timer.Elapsed += (sender, e) => Tick(e.SignalTime);
-
-        ClockBackgroundColor = BlackClockColor;
+        _timer.Elapsed += (sender, e) => Tick(e.SignalTime);
     }
 
     private void StartTimer() {
-        StartTime = DateTime.Now;
-        Timer.Start();
+        _startTime = DateTime.Now;
+        _timer.Start();
     }
 
     private void PauseTimer() {
-        Timer.Stop();
+        _timer.Stop();
     }
 
     private void Tick(DateTime signalTime) {
-        var time = OriginalTimeSpan.Subtract(signalTime - StartTime).Add(TimeSpan.FromSeconds(1));
-        if (ClockTime.TotalSeconds == 0) {
+        var time = _originalTimeSpan.Subtract(signalTime - _startTime).Add(TimeSpan.FromSeconds(1));
+        if (_clockTime.TotalSeconds == 0) {
             PlaySound(MoshiSound);
             Reset();
         } else {
-            ClockTime = time;
+            _clockTime = time;
         }
 
         StateHasChanged();
     }
 
     private void PlaySound(string soundPath) {
-        SoundPath = String.Empty;
+        _soundPath = String.Empty;
         StateHasChanged();
-        SoundPath = soundPath;
+        _soundPath = soundPath;
     }
 
     private async void RotateImage() {
@@ -116,19 +100,19 @@
         var requestResult = await client.GetAsync($"{PicEndpoint}&orientation={(useLandscape ? "LANDSCAPE" : "PORTRAIT")}");
         var content = await requestResult.Content.ReadAsStringAsync();
 
-        if (ShowBackground1) {
-            BackgroundImage2 = String.Empty;
-            BackgroundZ1 = "89";
-            BackgroundZ2 = "90";
-            BackgroundImage2 = (JsonConvert.DeserializeObject<dynamic>(content))?.images[0].url ?? String.Empty;
+        if (_showBackground1) {
+            _backgroundImage2 = String.Empty;
+            _backgroundZ1 = "89";
+            _backgroundZ2 = "90";
+            _backgroundImage2 = (JsonConvert.DeserializeObject<dynamic>(content))?.images[0].url ?? String.Empty;
         } else {
-            BackgroundImage1 = String.Empty;
-            BackgroundZ1 = "90";
-            BackgroundZ2 = "89";
-            BackgroundImage1 = (JsonConvert.DeserializeObject<dynamic>(content))?.images[0].url ?? String.Empty;
+            _backgroundImage1 = String.Empty;
+            _backgroundZ1 = "90";
+            _backgroundZ2 = "89";
+            _backgroundImage1 = (JsonConvert.DeserializeObject<dynamic>(content))?.images[0].url ?? String.Empty;
         }
 
-        ShowBackground1 = !ShowBackground1;
+        _showBackground1 = !_showBackground1;
 
         StateHasChanged();
     }
@@ -148,33 +132,33 @@
     }
 
     private void Reset() {
-        Timer.Stop();
+        _timer.Stop();
 
-        if (WorkMode) {
-            OriginalTimeSpan = BreakTimeSpan;
+        if (_workMode) {
+            _originalTimeSpan = BreakTimeSpan;
         } else {
-            OriginalTimeSpan = WorkTimeSpan;
+            _originalTimeSpan = WorkTimeSpan;
         }
 
-        ClockBackgroundColor = BlackClockColor;
-        ClockTime = OriginalTimeSpan;
-        WorkMode = !WorkMode;
-        TimerActive = false;
+        _clockBackgroundColor = BlackClockColor;
+        _clockTime = _originalTimeSpan;
+        _workMode = !_workMode;
+        _timerActive = false;
 
         RotateImage();
     }
 
     private void ToggleState() {
-        if (TimerActive) {
-            OriginalTimeSpan = ClockTime;
-            Timer.Stop();
-            ClockBackgroundColor = BlackClockColor;
+        if (_timerActive) {
+            _originalTimeSpan = _clockTime;
+            _timer.Stop();
+            _clockBackgroundColor = BlackClockColor;
         } else {
-            StartTime = DateTime.Now;
-            Timer.Start();
-            ClockBackgroundColor = WorkMode ? GreenClockColor : BlueClockColor;
+            _startTime = DateTime.Now;
+            _timer.Start();
+            _clockBackgroundColor = _workMode ? GreenClockColor : BlueClockColor;
         }
 
-        TimerActive = !TimerActive;
+        _timerActive = !_timerActive;
     }
 }
