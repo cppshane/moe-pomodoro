@@ -11,8 +11,7 @@ body, html {
   position: absolute;
   width: 100%;
   height: 100%;
-  background-image: linear-gradient(to right top, #ffffff, #f4f4fe, #e8e9fd, #dadffc, #c9d6fc, #c9d6fc, #c9d6fc, #c9d6fc, #dadffc, #e8e9fd, #f4f4fe, #ffffff);
-  display: flex;
+  background-image: linear-gradient(to right top, #000000, #210c17, #36112e, #45194e, #482774, #472e8e, #3d36a9, #1b40c6, #303cd6, #4734e6, #6027f3, #7900ff);  display: flex;
   justify-content: center;
   align-items: center;
 }
