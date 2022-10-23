@@ -7,12 +7,12 @@
 
 <div id="background-1" style="--background-image-1:url('@_backgroundImage1');--background-z-1:@_backgroundZ1;"></div>
 <div id="background-2" style="--background-image-2:url('@_backgroundImage2');--background-z-2:@_backgroundZ2;"></div>
-<div class="dark-overlay"></div>
-<div class="outer-container">
-    <div class="inner-container">
+<div id="dark-overlay"></div>
+<div id="outer-container">
+    <div id="inner-container">
         <h1>Moe Pomodoro</h1>
         <a class="github-button" href="https://github.com/cppshane/moe-pomodoro" data-icon="octicon-star" data-size="large" data-show-count="true">Star</a>
-        <div class="clock-container" @onclick="ToggleState">
+        <div id="clock-container" @onclick="ToggleState">
             <p id="time-text">@TimerString</p>
             <div id="clock-background" style="--clock-background-color:@_clockBackgroundColor"></div>
             <div id="clock-foreground"></div>
@@ -37,12 +37,6 @@
     private static readonly string GreenClockColor = "rgba(0, 255, 20, 0.15)";
     private static readonly string BlueClockColor = "rgba(0, 184, 255, 0.1)";
 
-    public string TimerString {
-        get {
-            return _clockTime.ToString(@"mm\:ss");
-        }
-    }
-
     private HttpClient client = new HttpClient();
     private SystemTimer _timer = new SystemTimer(1000);
 
@@ -57,10 +51,15 @@
     private bool _workMode = true;
     private bool _timerActive = false;
 
-    private TimeSpan _originalTimeSpan;
-    private TimeSpan _clockTime;
+    private TimeSpan _originalTimeSpan = WorkTimeSpan;
+    private TimeSpan _clockTime = WorkTimeSpan;
     private DateTime _startTime;
 
+    public string TimerString {
+        get {
+            return _clockTime.ToString(@"mm\:ss");
+        }
+    }
 
     public Index() {
         _timer.Elapsed += (sender, e) => Tick(e.SignalTime);
