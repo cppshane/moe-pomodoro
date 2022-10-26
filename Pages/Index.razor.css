@@ -27,15 +27,6 @@
   z-index: var(--background-z-2);
 }
 
-#dark-overlay {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(1px);
-  z-index: 91;
-}
-
 #outer-container {
   position: absolute;
   height: 100%;
