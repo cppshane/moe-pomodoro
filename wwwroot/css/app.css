@@ -11,7 +11,7 @@ body, html {
   position: absolute;
   width: 100%;
   height: 100%;
-  background-image: linear-gradient(to right top, #000000, #120108, #1b0214, #20041e, #20082a, #20082a, #20082a, #20082a, #20041e, #1b0214, #120108, #000000);
+  background-image: linear-gradient(to right top, #484848, #45434b, #423e4e, #403951, #3f3353, #3f3353, #3f3353, #3f3353, #403951, #423e4e, #45434b, #484848);
   display: flex;
   justify-content: center;
   align-items: center;
