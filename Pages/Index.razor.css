@@ -5,6 +5,19 @@
   margin-bottom: 0.5em;
 }
 
+
+p {
+  font-family: 'Roboto Mono', monospace;
+  color: #FFFFFF;
+  font-size: 0.75em;
+  margin-top: 2.5em;
+  margin-bottom: 0.5em;
+}
+
+a {
+  color: #FFFFFF;
+}
+
 #background-1 {
   position: absolute;
   height: 100%;

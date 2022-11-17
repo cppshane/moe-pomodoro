@@ -21,6 +21,7 @@
             <img src="https://cdn.shaneduffy.io/moe-pomodoro/reset.webp" />
             <div id="reset-background"></div>
         </div>
+        <p>(╯°□°）╯︵  <a href="https://waifu.im" target="_blank">waifu.im</a></p>
     </div>
 </div>
 @if (_soundPath != String.Empty) {
@@ -91,7 +92,7 @@
         StateHasChanged();
         _soundPath = soundPath;
     }
-
+     
     private async void RotateImage() {
         var dimensions = await jsModule.InvokeAsync<WindowDimensions>("getWindowSize");
         var useLandscape = dimensions.Width / dimensions.Height > 1.2;
