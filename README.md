@@ -6,3 +6,6 @@
 This is a <a href="https://en.wikipedia.org/wiki/Pomodoro_Technique">Pomodoro</a> web app to demo Blazor w/ WebAssembly. Also I made a <a href="https://www.youtube.com/watch?v=5gSqw18oSDM">YouTube Video</a>!
 
 i.e. no js 😁
+
+## Deploying
+To deploy, use Visual Studio's "publish", and then deploy `/bin/Release/.net6.0/browser-wasm/publish` to server.
