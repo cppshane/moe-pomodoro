@@ -31,7 +31,7 @@
 @code {
     private IJSObjectReference jsModule;
 
-    private static readonly string PicEndpoint = "https://api.waifu.im/search/?is_nsfw=false";
+    private static readonly string PicEndpoint = "https://api.waifu.im/images/?is_nsfw=false";
     private static readonly string MoshiSound = "https://cdn.shaneduffy.io/moe-pomodoro/audio/moshi.mp3";
 
     private static readonly TimeSpan WorkTimeSpan = TimeSpan.FromMinutes(25);
@@ -106,17 +106,18 @@
 
         var requestResult = await client.GetAsync($"{PicEndpoint}&orientation={(useLandscape ? "LANDSCAPE" : "PORTRAIT")}");
         var content = await requestResult.Content.ReadAsStringAsync();
+        var imageUrl = (JsonConvert.DeserializeObject<dynamic>(content))?.items[0].url ?? String.Empty;
 
         if (_showBackground1) {
             _backgroundImage2 = String.Empty;
             _backgroundZ1 = "89";
             _backgroundZ2 = "90";
-            _backgroundImage2 = (JsonConvert.DeserializeObject<dynamic>(content))?.images[0].url ?? String.Empty;
+            _backgroundImage2 = imageUrl;
         } else {
             _backgroundImage1 = String.Empty;
             _backgroundZ1 = "90";
             _backgroundZ2 = "89";
-            _backgroundImage1 = (JsonConvert.DeserializeObject<dynamic>(content))?.images[0].url ?? String.Empty;
+            _backgroundImage1 = imageUrl;
         }
 
         _showBackground1 = !_showBackground1;
